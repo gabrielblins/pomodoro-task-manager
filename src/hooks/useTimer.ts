@@ -48,6 +48,14 @@ export function useTimer({ onComplete }: UseTimerProps) {
     }));
   }, []);
 
+  // Add time to current timer (in seconds)
+  const addTime = useCallback((seconds: number) => {
+    setTimerState((prev) => ({
+      ...prev,
+      timeRemaining: prev.timeRemaining + seconds,
+    }));
+  }, []);
+
   // Stop timer and reset
   const stopTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -123,6 +131,7 @@ export function useTimer({ onComplete }: UseTimerProps) {
     startTimer,
     pauseTimer,
     resumeTimer,
+    addTime,
     stopTimer,
     incrementCycle,
     resetCycles,

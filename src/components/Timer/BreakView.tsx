@@ -27,12 +27,14 @@ const BreakView: React.FC = () => {
     getActiveEffect,
     consumeActiveEffect,
     useTimeBank,
-    inventory 
+    addToTimeBank,
+    inventory,
+    hasItem
   } = useApp();
   const breakTimer = useTimer({
     onComplete: handleTimerComplete,
   });
-  const { timerState, startTimer, pauseTimer, resumeTimer, stopTimer, formatTime } = breakTimer;
+  const { timerState, startTimer, pauseTimer, resumeTimer, addTime, stopTimer, formatTime } = breakTimer;
 
   function handleTimerComplete() {
     // Show notifications when break ends
@@ -61,6 +63,14 @@ const BreakView: React.FC = () => {
   }, []);
 
   const handleFinish = () => {
+    // If user has Time Bank and there's time remaining, store it
+    if (hasItem('time-bank') && timerState.timeRemaining > 0) {
+      const unusedMinutes = Math.floor(timerState.timeRemaining / 60);
+      if (unusedMinutes > 0) {
+        addToTimeBank(unusedMinutes);
+      }
+    }
+    
     stopTimer();
     setViewMode('taskList');
   };
@@ -141,11 +151,8 @@ const BreakView: React.FC = () => {
                 onClick={() => {
                   const minutesToAdd = Math.min(5, inventory.timeBank);
                   if (useTimeBank(minutesToAdd)) {
-                    const newDuration = timerState.timeRemaining + (minutesToAdd * 60);
-                    // We need to update the timer state with the new duration
-                    if (timerState.mode !== 'idle') {
-                      startTimer(Math.ceil(newDuration / 60), timerState.mode);
-                    }
+                    // Add time to the current timer without restarting
+                    addTime(minutesToAdd * 60);
                   }
                 }}
                 color="info"
